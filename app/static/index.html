@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Caesar Cipher & Cryptography Suite</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js for frequency analysis visualization -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              900: '#312e81',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 15px rgba(99, 102, 241, 0.2); }
+      50% { box-shadow: 0 0 25px rgba(99, 102, 241, 0.4); }
+    }
+    .crypto-glow {
+      animation: pulseGlow 4s infinite;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased selection:bg-indigo-500 selection:text-white">
+
+  <!-- Header -->
+  <header class="border-b border-slate-800 bg-slate-900/70 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+          </svg>
+        </div>
+        <div>
+          <h1 class="font-bold text-lg leading-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">Caesar Crypto Suite</h1>
+          <p class="text-xs text-indigo-400 font-medium">FastAPI & Cryptanalysis Engine</p>
+        </div>
+      </div>
+      <div class="flex items-center space-x-4">
+        <a href="/docs" target="_blank" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700 transition flex items-center gap-1.5">
+          <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          Interactive API Docs
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+    <!-- Cipher Navigation Tabs -->
+    <div class="flex border-b border-slate-800 space-x-8 text-sm font-medium">
+      <button onclick="switchTab('caesar')" id="tab-caesar" class="py-3 px-1 border-b-2 border-indigo-500 text-indigo-400 transition flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+        Caesar Cipher
+      </button>
+      <button onclick="switchTab('cracker')" id="tab-cracker" class="py-3 px-1 border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+        Smart Brute-Force Cracker
+      </button>
+      <button onclick="switchTab('extended')" id="tab-extended" class="py-3 px-1 border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+        Multi-Cipher (Vigenère / Atbash / ROT13)
+      </button>
+      <button onclick="switchTab('files')" id="tab-files" class="py-3 px-1 border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+        File Processing
+      </button>
+    </div>
+
+    <!-- TAB 1: CAESAR CIPHER PLAYGROUND -->
+    <section id="panel-caesar" class="space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- Left: Input & Shift Controls -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-semibold uppercase tracking-wider text-slate-400">Input Message</span>
+            <div class="flex items-center space-x-2">
+              <button onclick="clearText()" class="text-xs text-slate-400 hover:text-slate-200 px-2 py-1 rounded bg-slate-800">Clear</button>
+              <button onclick="swapText()" class="text-xs text-indigo-400 hover:text-indigo-300 px-2 py-1 rounded bg-indigo-950/60 border border-indigo-800 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path></svg>
+                Swap
+              </button>
+            </div>
+          </div>
+
+          <textarea id="caesarInput" rows="5" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono text-sm resize-none placeholder-slate-600" placeholder="Type or paste your text here (e.g. Hello, World!)...">The quick brown fox jumps over the lazy dog.</textarea>
+
+          <!-- Shift Slider -->
+          <div class="bg-slate-950 border border-slate-800/80 rounded-xl p-4 space-y-3">
+            <div class="flex items-center justify-between">
+              <label for="shiftRange" class="text-xs font-semibold uppercase text-slate-400">Shift Key (k)</label>
+              <div class="flex items-center space-x-2">
+                <button onclick="decrementShift()" class="w-7 h-7 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center justify-center font-bold">-</button>
+                <span id="shiftDisplay" class="font-mono text-base font-bold text-indigo-400 px-3 py-0.5 rounded bg-indigo-950 border border-indigo-800/60 min-w-10 text-center">3</span>
+                <button onclick="incrementShift()" class="w-7 h-7 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center justify-center font-bold">+</button>
+              </div>
+            </div>
+            <input type="range" id="shiftRange" min="0" max="25" value="3" class="w-full accent-indigo-500 cursor-pointer" oninput="onShiftSliderChange(this.value)">
+            <div class="flex justify-between text-[11px] text-slate-500 font-mono">
+              <span>0 (A)</span>
+              <span>13 (ROT13)</span>
+              <span>25 (Z)</span>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="grid grid-cols-2 gap-4">
+            <button onclick="runCaesar('encrypt')" class="w-full py-3 px-4 rounded-xl font-medium bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white shadow-lg shadow-indigo-600/30 transition flex items-center justify-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+              Encrypt
+            </button>
+            <button onclick="runCaesar('decrypt')" class="w-full py-3 px-4 rounded-xl font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center justify-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"></path></svg>
+              Decrypt
+            </button>
+          </div>
+        </div>
+
+        <!-- Right: Live Output & Alphabet Mapping -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5 flex flex-col justify-between">
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-semibold uppercase tracking-wider text-slate-400">Result Output</span>
+              <button onclick="copyOutput()" class="text-xs text-indigo-400 hover:text-indigo-300 px-3 py-1 rounded bg-indigo-950/60 border border-indigo-800 flex items-center gap-1.5 transition">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                <span id="copyBtnLabel">Copy</span>
+              </button>
+            </div>
+
+            <textarea id="caesarOutput" rows="5" readonly class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-indigo-300 font-mono text-sm resize-none focus:outline-none" placeholder="Encrypted/decrypted output will appear here..."></textarea>
+          </div>
+
+          <!-- Alphabet Shift Wheel Map -->
+          <div class="bg-slate-950 border border-slate-800/80 rounded-xl p-4 space-y-2">
+            <div class="flex justify-between items-center text-xs font-semibold text-slate-400 uppercase">
+              <span>Plain Alphabet</span>
+              <span>Cipher Alphabet</span>
+            </div>
+            <div class="overflow-x-auto py-1">
+              <div class="font-mono text-xs tracking-wider space-y-1">
+                <div class="text-slate-400">A B C D E F G H I J K L M N O P Q R S T U V W X Y Z</div>
+                <div id="cipherAlphabetDisplay" class="text-indigo-400 font-bold">D E F G H I J K L M N O P Q R S T U V W X Y Z A B C</div>
+              </div>
+            </div>
+            <p class="text-[11px] text-slate-500 font-mono">Formula: <span class="text-indigo-400">C = (P + k) mod 26</span></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Frequency Histogram -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-base font-semibold text-slate-200">Letter Frequency Analysis</h3>
+            <p class="text-xs text-slate-400">Compare current text distribution against standard English frequencies (ETAOIN)</p>
+          </div>
+          <button onclick="updateFrequencyChart()" class="text-xs text-slate-300 bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg border border-slate-700">Refresh Chart</button>
+        </div>
+        <div class="h-64">
+          <canvas id="freqChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: SMART BRUTE FORCE CRACKER -->
+    <section id="panel-cracker" class="hidden space-y-6">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+        <div>
+          <h2 class="text-lg font-bold text-slate-100">Smart English Brute-Force Cracker</h2>
+          <p class="text-xs text-slate-400">Automatically tests all 25 shift variations, calculates Chi-Squared letter distribution match, and identifies standard English dictionary words.</p>
+        </div>
+
+        <div class="space-y-2">
+          <label class="text-xs font-semibold uppercase text-slate-400">Ciphertext to Crack</label>
+          <textarea id="crackInput" rows="3" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-slate-200 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-slate-600" placeholder="Paste an unknown Caesar ciphertext...">Wkh txlfn eurzq ira mxpsv ryhu wkh odcb grj.</textarea>
+        </div>
+
+        <button onclick="runAutoCrack()" class="py-2.5 px-5 rounded-xl font-medium bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white shadow-lg shadow-indigo-600/30 transition flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+          Crack Cipher
+        </button>
+      </div>
+
+      <!-- Cracking Results -->
+      <div id="crackResultsCard" class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+          <div>
+            <span class="text-xs uppercase font-bold text-indigo-400 tracking-wider">Top Detected Match</span>
+            <h3 id="bestMatchTitle" class="text-xl font-bold text-slate-100 mt-1">Shift 3 (Confidence: High)</h3>
+          </div>
+          <div class="text-right">
+            <span class="text-xs text-slate-400">Chi-Squared Score</span>
+            <div id="bestScore" class="font-mono text-lg font-bold text-emerald-400">12.4</div>
+          </div>
+        </div>
+
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-4">
+          <p id="bestDecryptedText" class="font-mono text-slate-200 text-sm whitespace-pre-wrap"></p>
+        </div>
+
+        <!-- Full Table of All 25 Shifts -->
+        <div class="pt-4 space-y-3">
+          <h4 class="text-sm font-semibold text-slate-300">All 25 Possible Decryptions (Ranked)</h4>
+          <div class="overflow-x-auto max-h-96 border border-slate-800 rounded-xl">
+            <table class="w-full text-left text-xs font-mono">
+              <thead class="bg-slate-950 text-slate-400 border-b border-slate-800 sticky top-0">
+                <tr>
+                  <th class="py-2.5 px-3">Rank</th>
+                  <th class="py-2.5 px-3">Shift Key</th>
+                  <th class="py-2.5 px-3">Score</th>
+                  <th class="py-2.5 px-3">Decrypted Candidate</th>
+                  <th class="py-2.5 px-3 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody id="crackTableBody" class="divide-y divide-slate-800/60 bg-slate-900/60">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: EXTENDED CIPHERS -->
+    <section id="panel-extended" class="hidden space-y-6">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+        <div>
+          <h2 class="text-lg font-bold text-slate-100">Extended Classical Ciphers</h2>
+          <p class="text-xs text-slate-400">Switch between Vigenère (polyalphabetic), Atbash (inversion), and ROT13.</p>
+        </div>
+
+        <div class="flex flex-wrap gap-3">
+          <button onclick="selectExtendedCipher('vigenere')" id="btn-vigenere" class="px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 text-white border border-indigo-500 transition">Vigenère Cipher</button>
+          <button onclick="selectExtendedCipher('atbash')" id="btn-atbash" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700 transition">Atbash Cipher</button>
+          <button onclick="selectExtendedCipher('rot13')" id="btn-rot13" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700 transition">ROT13 Cipher</button>
+        </div>
+
+        <div class="space-y-4">
+          <div id="vigenereKeyGroup" class="space-y-1">
+            <label class="text-xs font-semibold uppercase text-slate-400">Key Word (e.g. SECRET)</label>
+            <input type="text" id="extKey" value="KEY" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-slate-200 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 uppercase" placeholder="Enter keyword...">
+          </div>
+
+          <div class="space-y-1">
+            <label class="text-xs font-semibold uppercase text-slate-400">Message Text</label>
+            <textarea id="extInput" rows="4" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-slate-200 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Enter message...">Attack at dawn!</textarea>
+          </div>
+
+          <div class="flex items-center space-x-4">
+            <button onclick="runExtendedCipher(false)" class="py-2.5 px-6 rounded-xl font-medium bg-indigo-600 hover:bg-indigo-500 text-white transition">Encrypt</button>
+            <button onclick="runExtendedCipher(true)" id="btnExtDecrypt" class="py-2.5 px-6 rounded-xl font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">Decrypt</button>
+          </div>
+
+          <div class="space-y-1 pt-3">
+            <label class="text-xs font-semibold uppercase text-slate-400">Output</label>
+            <textarea id="extOutput" rows="4" readonly class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-indigo-300 font-mono text-sm focus:outline-none" placeholder="Result will appear here..."></textarea>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: FILE PROCESSING -->
+    <section id="panel-files" class="hidden space-y-6">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6 max-w-2xl">
+        <div>
+          <h2 class="text-lg font-bold text-slate-100">File Encryption & Decryption</h2>
+          <p class="text-xs text-slate-400">Encrypt or decrypt any plain text (.txt) file using the Caesar cipher and download the result directly.</p>
+        </div>
+
+        <form id="fileForm" onsubmit="handleFileUpload(event)" class="space-y-4">
+          <div class="border-2 border-dashed border-slate-700 rounded-2xl p-6 text-center hover:border-indigo-500 transition cursor-pointer" onclick="document.getElementById('fileUploadInput').click()">
+            <svg class="mx-auto h-10 w-10 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+            <p class="mt-2 text-sm text-slate-300" id="fileChosenLabel">Click to select a .txt file</p>
+            <input type="file" id="fileUploadInput" accept=".txt,.csv,.md" class="hidden" onchange="onFileSelected(this)">
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="text-xs font-semibold uppercase text-slate-400">Shift Key (0-25)</label>
+              <input type="number" id="fileShift" value="3" min="0" max="25" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200 font-mono text-sm">
+            </div>
+            <div>
+              <label class="text-xs font-semibold uppercase text-slate-400">Operation</label>
+              <select id="fileOperation" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200 text-sm">
+                <option value="encrypt">Encrypt</option>
+                <option value="decrypt">Decrypt</option>
+              </select>
+            </div>
+          </div>
+
+          <button type="submit" class="w-full py-3 px-4 rounded-xl font-medium bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white shadow-lg shadow-indigo-600/30 transition flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            Process & Download File
+          </button>
+        </form>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
