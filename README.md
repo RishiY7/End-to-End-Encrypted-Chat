@@ -1,4 +1,4 @@
-# Caesar Cipher & Cryptography Suite 🔐
+# Secure End-to-End Encrypted Chat Using Hybrid Cryptography and Caesar Cipher 🔐
 
 A high-performance classical cryptography playground and REST API built with **FastAPI**, **Pydantic**, and a responsive **Tailwind CSS & Chart.js** frontend.
 
