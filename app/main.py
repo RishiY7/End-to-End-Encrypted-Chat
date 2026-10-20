@@ -13,7 +13,7 @@ from app.schemas import (
 )
 
 app = FastAPI(
-    title="Secure End-to-End Encrypted Chat Using Hybrid Cryptography and Caesar Cipher",
+    title="Classical Cryptography Suite & Automated Cryptanalysis Engine",
     description="High-performance cryptographic API featuring Caesar cipher, automated cryptanalysis, and extended classical ciphers.",
     version="2.0.0"
 )

@@ -1,55 +1,71 @@
-# Secure End-to-End Encrypted Chat Using Hybrid Cryptography and Caesar Cipher 🔐
+# Classical Cryptography Suite & Automated Cryptanalysis Engine 🔐
 
-A high-performance classical cryptography playground and REST API built with **FastAPI**, **Pydantic**, and a responsive **Tailwind CSS & Chart.js** frontend.
-
----
-
-## ✨ Features
-
-- **Interactive Web UI**: Real-time slider shift adjustment, Caesar wheel visual mapping, one-click copy, and text swapping.
-- **FastAPI Backend**: Fully typed REST API with Pydantic validation schemas and interactive Swagger UI documentation at `/docs`.
-- **Smart English Brute-Force Cracker**:
-  - Tests all 25 shift possibilities in real time.
-  - Utilizes **Chi-Squared ($\chi^2$) statistic** and English letter frequency analysis to accurately rank and identify the original plaintext.
-  - Confidence scoring categorized into High, Medium, and Low based on correlation thresholds.
-- **Letter Frequency Analysis**:
-  - Live interactive histogram comparing ciphertext letter distributions against standard English (ETAOIN).
-- **Extended Classical Ciphers**:
-  - **Vigenère Cipher**: Polyalphabetic key-based encryption and decryption.
-  - **Atbash Cipher**: Alphabet substitution / inversion cipher.
-  - **ROT13**: Symmetric 13-shift cipher.
-- **File Processing**:
-  - Upload `.txt` files to stream encrypt or decrypt and download the output.
-- **Comprehensive Test Suite**: Automated unit tests with standard `unittest` covering edge cases, modular wraparounds, punctuation handling, and cracker logic.
+> A full-stack classical cipher playground, statistical cryptanalysis engine, and REST API built with **FastAPI**, **Pydantic**, and a responsive **Tailwind CSS & Chart.js** frontend.
 
 ---
 
-## 🚀 Quick Start
+## 📑 Abstract
+
+This project presents an interactive, full-stack cryptographic platform developed in Python that bridges theoretical classical cryptography with modern web-based cryptanalysis tools. Built on a modular architecture using FastAPI and Pydantic on the backend alongside a responsive Tailwind CSS and Chart.js frontend, the system implements key classical substitution ciphers, including the Caesar, Vigenère, Atbash, and ROT13 algorithms. 
+
+To explore cryptographic vulnerabilities, the application incorporates an automated cryptanalysis engine capable of cracking unknown Caesar ciphertexts without prior knowledge of the shift key. The cracking subsystem evaluates all 25 possible permutations using a Chi-Squared ($\chi^2$) goodness-of-fit test against standard English letter frequency distributions (ETAOIN SHRDLU), augmented by dictionary-based pattern matching to rank candidates and assign statistical confidence scores. Additionally, the platform provides real-time letter frequency visualizations, stream-based file encryption and decryption for text documents, and a comprehensive automated unit-testing framework. The system serves as an educational and analytical tool demonstrating fundamental substitution cipher mathematics, modular arithmetic, and the inherent statistical weaknesses of monoalphabetic encryption.
+
+**Keywords:** Classical Cryptography, Caesar Cipher, Vigenère Cipher, Frequency Analysis, Chi-Squared ($\chi^2$) Test, Cryptanalysis, Brute-Force Cracking, FastAPI, Python.
+
+---
+
+## Features
+
+- **Interactive Web UI** — Real-time shift slider, Caesar alphabet wheel, one-click copy and text swap.
+- **FastAPI Backend** — Fully typed REST API with Pydantic validation and interactive Swagger UI at `/docs`.
+- **Smart Brute-Force Cracker**
+  - Tests all 25 shift possibilities automatically.
+  - Uses the **Chi-Squared (chi2) statistic** and English letter frequency analysis to rank candidates.
+  - Confidence scoring: High / Medium / Low.
+- **Letter Frequency Analysis** — Live histogram comparing ciphertext distribution against standard English (ETAOIN).
+- **Extended Classical Ciphers**
+  - **Vigenere Cipher** — Polyalphabetic keyword-based encryption and decryption.
+  - **Atbash Cipher** — Alphabet inversion substitution cipher.
+  - **ROT13** — Symmetric 13-shift Caesar variant.
+- **File Processing** — Upload `.txt` files, encrypt or decrypt, and download the result.
+- **Unit Test Suite** — Automated tests with `unittest` covering all algorithms, edge cases, and wraparound logic.
+
+---
+
+## Quick Start
 
 ### 1. Installation
+
 Clone the repository and install dependencies:
+
 ```bash
-git clone https://github.com/Vishnuj-n/caesar-cipher-python.git
-cd caesar-cipher-python
+git clone https://github.com/RishiY7/End-to-End-Encrypted-Chat.git
+cd End-to-End-Encrypted-Chat
 pip install -r requirements.txt
 ```
 
 ### 2. Launch the Application
-Run the FastAPI web server with Uvicorn:
+
+Run the FastAPI server with auto-reload:
+
 ```bash
 uvicorn app.main:app --reload
 ```
 
 ### 3. Open in Browser
-- **Web Dashboard**: [http://127.0.0.1:8000](http://127.0.0.1:8000)
-- **Interactive Swagger API Docs**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
-- **ReDoc Documentation**: [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
+
+| URL | Purpose |
+| :--- | :--- |
+| http://127.0.0.1:8000 | Web Dashboard UI |
+| http://127.0.0.1:8000/docs | Interactive Swagger API Docs |
+| http://127.0.0.1:8000/redoc | ReDoc API Reference |
 
 ---
 
-## 🧪 Testing & Verification
+## Testing & Verification
 
-Run the cryptographic test suite:
+Run the full test suite:
+
 ```bash
 python -m unittest discover tests -v
 ```
@@ -58,44 +74,51 @@ python -m unittest discover tests -v
 
 | Test Vector | Expected Output | Status |
 | :--- | :--- | :--- |
-| **Caesar: `HELLO`, shift 3** | `KHOOR` |  Passed |
-| **Caesar: `XYZ`, shift 3** | `ABC` |  Passed |
-| **Caesar: `ABC`, shift 0 / 26** | `ABC` |  Passed |
-| **Caesar: `Hello, World!`, shift 3** | `Khoor, Zruog!` |  Passed |
-| **Vigenère: `ATTACKATDAWN`, key `LEMON`** | `LXFOPVEFRNHR` |  Passed |
-| **Atbash: `Attack at dawn!`** | `Zggzxp zg wzdm!` |  Passed |
-| **ROT13: Round-trip** | Plaintext preserved |  Passed |
+| Caesar: `HELLO`, shift 3 | `KHOOR` | Passed |
+| Caesar: `XYZ`, shift 3 | `ABC` | Passed |
+| Caesar: `ABC`, shift 0 / 26 | `ABC` | Passed |
+| Caesar: `Hello, World!`, shift 3 | `Khoor, Zruog!` | Passed |
+| Vigenere: `ATTACKATDAWN`, key `LEMON` | `LXFOPVEFRNHR` | Passed |
+| Atbash: `Attack at dawn!` | `Zggzxp zg wzdm!` | Passed |
+| ROT13: Round-trip | Plaintext preserved | Passed |
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
-```text
-caesar-cipher-python/
-│
-├── app/
-│   ├── main.py                  # FastAPI server entry point & REST endpoints
-│   ├── schemas.py               # Pydantic request & response models
-│   ├── core/
-│   │   ├── __init__.py
-│   │   ├── caesar.py            # Caesar encryption, decryption, chi2 scoring
-│   │   └── ciphers.py           # Vigenère, Atbash, ROT13 ciphers
-│   └── static/
-│       ├── index.html           # Modern dark-theme UI dashboard
-│       └── app.js               # Frontend interaction, chart rendering, API calls
-│
-├── tests/
-│   └── test_ciphers.py          # Unit tests for all algorithms
-│
-├── caesar-cipher-python.py      # Standalone legacy CLI script
-├── requirements.txt             # Project dependencies
-├── ONBOARDING.md                # Developer onboarding guide
-└── README.md
+```
+End-to-End Encrypted Chat/
+|
++-- app/                              # FastAPI application package
+|   +-- main.py                       # Server entry point & all REST API routes
+|   +-- schemas.py                    # Pydantic request & response models
+|   +-- crypto/                       # Cryptographic algorithms module
+|   |   +-- __init__.py
+|   |   +-- caesar.py                 # Caesar cipher, Chi2 scoring, brute-force cracker
+|   |   +-- ciphers.py                # Vigenere, Atbash, ROT13 implementations
+|   +-- static/                       # Web UI assets (served by FastAPI)
+|       +-- index.html                # Dark-theme Tailwind CSS dashboard (4 tabs)
+|       +-- app.js                    # Client-side logic, Chart.js, API calls
+|
++-- tests/                            # Automated unit test suite
+|   +-- test_ciphers.py               # unittest cases for all cipher algorithms
+|
++-- notebooks/                        # Jupyter notebooks for demos & exploration
+|   +-- caesar_demo.ipynb             # Interactive Caesar cipher walkthrough
+|
++-- scripts/                          # Standalone command-line utilities
+|   +-- caesar_cli.py                 # CLI encrypt / decrypt / brute-force tool
+|
++-- docs/                             # Project documentation
+|   +-- ONBOARDING.md                 # Developer setup & architecture guide
+|
++-- requirements.txt                  # Production dependencies
++-- README.md                         # Project overview (this file)
 ```
 
 ---
 
-## 📡 API Endpoints Overview
+## API Endpoints Overview
 
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
@@ -103,13 +126,13 @@ caesar-cipher-python/
 | `POST` | `/api/v1/caesar/decrypt` | Decrypt text with a shift value |
 | `POST` | `/api/v1/caesar/brute-force` | Brute-force crack with Chi-Squared ranking |
 | `POST` | `/api/v1/caesar/frequency` | Character count & observed frequency vs English |
-| `POST` | `/api/v1/ciphers/vigenere` | Vigenère encryption/decryption with keyword |
+| `POST` | `/api/v1/ciphers/vigenere` | Vigenere encryption/decryption with keyword |
 | `POST` | `/api/v1/ciphers/atbash` | Atbash inverted cipher |
 | `POST` | `/api/v1/ciphers/rot13` | ROT13 cipher |
 | `POST` | `/api/v1/files/caesar` | Stream encrypt/decrypt uploaded text files |
 
 ---
 
-## 📖 Developer Guide
+## Developer Guide
 
 For complete local environment setup, virtual environments, and contribution guidelines, see [docs/ONBOARDING.md](docs/ONBOARDING.md).

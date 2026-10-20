@@ -1,6 +1,7 @@
 # Developer Onboarding Guide
 
-Welcome to the **Caesar Cipher & Classical Cryptography Suite**! This guide walks you through setting up your local environment, running the application, executing tests, and understanding the project architecture.
+Welcome to the **Classical Cryptography Suite & Automated Cryptanalysis Engine** project!
+This guide walks you through setting up your local environment, running the application, executing tests, and understanding the project architecture.
 
 ---
 
@@ -15,30 +16,36 @@ Welcome to the **Caesar Cipher & Classical Cryptography Suite**! This guide walk
 ## 2. Environment Setup
 
 ### 2.1 Clone the Repository
+
 ```bash
-git clone https://github.com/Vishnuj-n/caesar-cipher-python.git
-cd caesar-cipher-python
+git clone https://github.com/RishiY7/End-to-End-Encrypted-Chat.git
+cd End-to-End-Encrypted-Chat
 ```
 
 ### 2.2 Create & Activate a Virtual Environment
+
 **On Windows (PowerShell):**
+
 ```powershell
 python -m venv .venv
 .venv\Scripts\Activate.ps1
 ```
 
 **On macOS / Linux:**
+
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 ```
 
 ### 2.3 Install Dependencies
+
 ```bash
 pip install -r requirements.txt
 ```
 
-*(Optional dev tools for testing & linting)*:
+Optional dev tools for testing and linting:
+
 ```bash
 pip install pytest
 ```
@@ -48,26 +55,33 @@ pip install pytest
 ## 3. Running the Application
 
 ### 3.1 Start the FastAPI Server
+
 Run the application with auto-reloading enabled:
+
 ```bash
 uvicorn app.main:app --reload
 ```
 
 ### 3.2 Access the Services
-- **Web UI Dashboard**: [http://127.0.0.1:8000](http://127.0.0.1:8000)
-- **Interactive Swagger Docs (OpenAPI)**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
-- **Alternative ReDoc**: [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
+
+| URL | Purpose |
+| :--- | :--- |
+| http://127.0.0.1:8000 | Web UI Dashboard |
+| http://127.0.0.1:8000/docs | Interactive Swagger Docs (OpenAPI) |
+| http://127.0.0.1:8000/redoc | Alternative ReDoc reference |
 
 ---
 
 ## 4. Running the Tests
 
-To run the full suite using Python's built-in `unittest` framework:
+Using Python's built-in `unittest` framework:
+
 ```bash
 python -m unittest discover tests -v
 ```
 
 Or using `pytest`:
+
 ```bash
 python -m pytest tests -v
 ```
@@ -76,36 +90,62 @@ python -m pytest tests -v
 
 ## 5. Project Architecture & Code Map
 
-```text
+```
 End-to-End Encrypted Chat/
-├── app/
-│   ├── main.py             # FastAPI entrypoint, router configuration, file upload endpoints
-│   ├── schemas.py          # Pydantic request/response data contracts
-│   ├── crypto/
-│   │   ├── __init__.py
-│   │   ├── caesar.py       # Caesar shift logic, Chi-squared (χ²) scoring, brute-force cracker
-│   │   └── ciphers.py      # Vigenère, Atbash, and ROT13 implementations
-│   └── static/
-│       ├── index.html      # Responsive web UI (Tailwind CSS, FontAwesome)
-│       └── app.js          # Client-side reactivity, Chart.js frequency distribution
-├── tests/
-│   └── test_ciphers.py     # Unit test suite verifying all cipher math and edge cases
-├── scripts/
-├── requirements.txt        # Production dependencies
-├── docs/
-│   └── ONBOARDING.md
+|
++-- app/
+|   +-- main.py             # FastAPI entry point, API routes, file upload endpoints
+|   +-- schemas.py          # Pydantic request/response data contracts
+|   +-- crypto/
+|   |   +-- __init__.py
+|   |   +-- caesar.py       # Caesar shift logic, Chi-squared scoring, brute-force cracker
+|   |   +-- ciphers.py      # Vigenere, Atbash, and ROT13 implementations
+|   +-- static/
+|       +-- index.html      # Responsive web UI (Tailwind CSS, Chart.js)
+|       +-- app.js          # Client-side interactivity, frequency chart rendering
+|
++-- tests/
+|   +-- test_ciphers.py     # Unit tests for all cipher algorithms and edge cases
+|
++-- notebooks/
+|   +-- caesar_demo.ipynb   # Jupyter notebook demo and walkthrough
+|
++-- scripts/
+|   +-- caesar_cli.py       # Standalone CLI script (no server required)
+|
++-- docs/
+|   +-- ONBOARDING.md       # This file
+|
++-- requirements.txt
++-- README.md
 ```
 
 ---
 
-## 6. Development Workflow & Git Best Practices
+## 6. Module Descriptions
 
-1. **Keep Secrets & Cache out of Git**: Never commit `.env`, `venv/`, or `__pycache__` directories. The repository includes a `.gitignore` that handles these automatically.
-2. **Verify tests before committing**:
+| Module | Purpose |
+| :--- | :--- |
+| `app/main.py` | Defines all 8 REST endpoints, mounts static files, configures CORS |
+| `app/schemas.py` | Pydantic models for request validation and response serialization |
+| `app/crypto/caesar.py` | `caesar_shift()`, `score_english()`, `brute_force_crack()`, `get_frequency_analysis()` |
+| `app/crypto/ciphers.py` | `vigenere_cipher()`, `atbash_cipher()`, `rot13()` |
+| `app/static/index.html` | Single-page app with 4 tabs: Caesar, Cracker, Multi-Cipher, File |
+| `app/static/app.js` | Fetch API calls, Chart.js histogram, tab switching, form handling |
+| `tests/test_ciphers.py` | 8 unittest cases covering all cipher algorithms and edge cases |
+| `scripts/caesar_cli.py` | Minimal standalone encrypt/decrypt/brute-force from the terminal |
+| `notebooks/caesar_demo.ipynb` | Interactive notebook for demos and exploration |
+
+---
+
+## 7. Development Workflow & Git Best Practices
+
+1. **Keep secrets and cache out of Git** — Never commit `.env`, `venv/`, or `__pycache__`. The `.gitignore` handles this automatically.
+2. **Verify tests before committing:**
    ```bash
    python -m unittest discover tests
    ```
-3. **Branching & Pull Requests**:
+3. **Branching & Pull Requests:**
    - Create a feature branch: `git checkout -b feat/your-feature-name`
    - Commit clean changes: `git commit -m "feat: add feature description"`
    - Push and open a PR against `main`.
