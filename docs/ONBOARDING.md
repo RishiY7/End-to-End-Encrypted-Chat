@@ -77,11 +77,11 @@ python -m pytest tests -v
 ## 5. Project Architecture & Code Map
 
 ```text
-caesar-cipher-python/
+End-to-End Encrypted Chat/
 ├── app/
 │   ├── main.py             # FastAPI entrypoint, router configuration, file upload endpoints
 │   ├── schemas.py          # Pydantic request/response data contracts
-│   ├── core/
+│   ├── crypto/
 │   │   ├── __init__.py
 │   │   ├── caesar.py       # Caesar shift logic, Chi-squared (χ²) scoring, brute-force cracker
 │   │   └── ciphers.py      # Vigenère, Atbash, and ROT13 implementations
@@ -90,10 +90,10 @@ caesar-cipher-python/
 │       └── app.js          # Client-side reactivity, Chart.js frequency distribution
 ├── tests/
 │   └── test_ciphers.py     # Unit test suite verifying all cipher math and edge cases
-├── caesar-cipher-python.py # Standalone legacy CLI script
+├── scripts/
 ├── requirements.txt        # Production dependencies
-├── CONTRIBUTING.md / ONBOARDING.md
-└── README.md               # User & project overview
+├── docs/
+│   └── ONBOARDING.md
 ```
 
 ---

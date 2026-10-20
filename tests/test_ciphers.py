@@ -1,6 +1,6 @@
 import unittest
-from app.core.caesar import caesar_shift, brute_force_crack, get_frequency_analysis
-from app.core.ciphers import rot13, atbash_cipher, vigenere_cipher
+from app.crypto.caesar import caesar_shift, brute_force_crack, get_frequency_analysis
+from app.crypto.ciphers import rot13, atbash_cipher, vigenere_cipher
 
 
 class TestCiphers(unittest.TestCase):

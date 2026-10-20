@@ -112,4 +112,4 @@ caesar-cipher-python/
 
 ## 📖 Developer Guide
 
-For complete local environment setup, virtual environments, and contribution guidelines, see [ONBOARDING.md](file:///c:/Users/vishn/PROJECT/CRYPTO/caesar-cipher-python/ONBOARDING.md).
+For complete local environment setup, virtual environments, and contribution guidelines, see [docs/ONBOARDING.md](docs/ONBOARDING.md).
