@@ -1,320 +1,762 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Classical Cryptography Suite & Automated Cryptanalysis Engine</title>
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Chart.js for frequency analysis visualization -->
+  <title>CryptSuite — Classical Cryptography & Cryptanalysis Engine</title>
+  <meta name="description" content="A powerful classical cryptography suite featuring Caesar cipher, smart brute-force cracker, multi-cipher support (Vigenère, Atbash, ROT13), frequency analysis, and file encryption.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              50: '#eef2ff',
-              100: '#e0e7ff',
-              500: '#6366f1',
-              600: '#4f46e5',
-              700: '#4338ca',
-              900: '#312e81',
-            }
-          }
-        }
-      }
-    }
-  </script>
   <style>
-    @keyframes pulseGlow {
-      0%, 100% { box-shadow: 0 0 15px rgba(99, 102, 241, 0.2); }
-      50% { box-shadow: 0 0 25px rgba(99, 102, 241, 0.4); }
+    /* =====================================================
+       CSS CUSTOM PROPERTIES — THEME SYSTEM
+    ===================================================== */
+    :root {
+      --font-sans: 'Inter', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+      --transition-fast: 0.15s ease;
+      --transition-base: 0.25s ease;
+      --brand: hsl(248, 80%, 62%);
+      --brand-light: hsl(248, 90%, 72%);
+      --brand-dark: hsl(248, 70%, 50%);
+      --brand-glow: hsla(248, 80%, 62%, 0.3);
+      --accent-cyan: hsl(190, 90%, 55%);
+      --accent-violet: hsl(270, 80%, 65%);
+      --accent-emerald: hsl(158, 75%, 50%);
+      --accent-amber: hsl(38, 95%, 55%);
     }
-    .crypto-glow {
-      animation: pulseGlow 4s infinite;
+
+    [data-theme="dark"] {
+      --bg-base: hsl(222, 30%, 7%);
+      --bg-surface: hsl(222, 25%, 11%);
+      --bg-elevated: hsl(222, 22%, 15%);
+      --bg-hover: hsl(222, 20%, 18%);
+      --bg-input: hsl(222, 30%, 8%);
+      --border-subtle: hsla(220, 20%, 100%, 0.06);
+      --border-default: hsla(220, 20%, 100%, 0.10);
+      --border-strong: hsla(220, 20%, 100%, 0.18);
+      --border-brand: hsla(248, 80%, 62%, 0.4);
+      --text-primary: hsl(220, 20%, 96%);
+      --text-secondary: hsl(220, 12%, 65%);
+      --text-muted: hsl(220, 10%, 42%);
+      --text-brand: hsl(248, 90%, 75%);
+      --text-code: hsl(190, 80%, 72%);
+      --shadow-sm: 0 1px 3px hsla(0,0%,0%,0.4);
+      --shadow-md: 0 4px 16px hsla(0,0%,0%,0.5);
+      --shadow-lg: 0 8px 32px hsla(0,0%,0%,0.6);
+      --shadow-brand: 0 4px 24px hsla(248, 80%, 62%, 0.25);
+      --glass-bg: hsla(222, 25%, 12%, 0.85);
+      --chart-grid: hsla(220, 20%, 100%, 0.05);
+      --chart-text: hsl(220, 12%, 55%);
+    }
+
+    [data-theme="light"] {
+      --bg-base: hsl(220, 30%, 97%);
+      --bg-surface: hsl(0, 0%, 100%);
+      --bg-elevated: hsl(220, 25%, 96%);
+      --bg-hover: hsl(220, 20%, 93%);
+      --bg-input: hsl(220, 30%, 98%);
+      --border-subtle: hsla(220, 20%, 0%, 0.05);
+      --border-default: hsla(220, 20%, 0%, 0.10);
+      --border-strong: hsla(220, 20%, 0%, 0.18);
+      --border-brand: hsla(248, 80%, 62%, 0.35);
+      --text-primary: hsl(222, 35%, 12%);
+      --text-secondary: hsl(222, 15%, 40%);
+      --text-muted: hsl(222, 10%, 60%);
+      --text-brand: hsl(248, 70%, 52%);
+      --text-code: hsl(248, 60%, 45%);
+      --shadow-sm: 0 1px 3px hsla(0,0%,0%,0.08);
+      --shadow-md: 0 4px 16px hsla(0,0%,0%,0.10);
+      --shadow-lg: 0 8px 32px hsla(0,0%,0%,0.14);
+      --shadow-brand: 0 4px 24px hsla(248, 80%, 62%, 0.18);
+      --glass-bg: hsla(0, 0%, 100%, 0.88);
+      --chart-grid: hsla(220, 20%, 0%, 0.06);
+      --chart-text: hsl(220, 15%, 50%);
+    }
+
+    /* =====================================================
+       RESET & BASE
+    ===================================================== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-base);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.6;
+      transition: background var(--transition-base), color var(--transition-base);
+      -webkit-font-smoothing: antialiased;
+    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 9999px; }
+
+    /* =====================================================
+       HEADER
+    ===================================================== */
+    .header {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--glass-bg);
+      border-bottom: 1px solid var(--border-default);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+    }
+    .header-inner {
+      max-width: 1280px; margin: 0 auto;
+      padding: 0 1.5rem; height: 64px;
+      display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .logo { display: flex; align-items: center; gap: 0.875rem; text-decoration: none; }
+    .logo-icon {
+      width: 40px; height: 40px; border-radius: 12px;
+      background: linear-gradient(135deg, var(--brand) 0%, var(--accent-violet) 100%);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: var(--shadow-brand); flex-shrink: 0; position: relative; overflow: hidden;
+    }
+    .logo-icon::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+      border-radius: inherit;
+    }
+    .logo-icon svg { color: white; width: 20px; height: 20px; position: relative; }
+    .logo-title { font-size: 1rem; font-weight: 700; color: var(--text-primary); letter-spacing: -0.02em; line-height: 1.2; }
+    .logo-sub { font-size: 0.7rem; font-weight: 500; color: var(--text-brand); letter-spacing: 0.04em; }
+    .header-actions { display: flex; align-items: center; gap: 0.75rem; }
+    .btn-docs {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.4rem 0.875rem; border-radius: 8px;
+      border: 1px solid var(--border-default); background: var(--bg-elevated);
+      color: var(--text-secondary); font-size: 0.75rem; font-weight: 500;
+      text-decoration: none; transition: all var(--transition-fast); cursor: pointer;
+    }
+    .btn-docs:hover { border-color: var(--border-brand); color: var(--text-brand); background: var(--bg-hover); }
+    .btn-docs svg { color: var(--accent-emerald); width: 14px; height: 14px; }
+    .status-pill {
+      display: flex; align-items: center; gap: 0.4rem;
+      padding: 0.3rem 0.75rem; border-radius: 9999px;
+      border: 1px solid hsla(158, 75%, 50%, 0.25);
+      background: hsla(158, 75%, 50%, 0.08);
+      font-size: 0.7rem; font-weight: 600; color: var(--accent-emerald); letter-spacing: 0.03em;
+    }
+    .status-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent-emerald); animation: pulse-dot 2s ease infinite;
+    }
+    @keyframes pulse-dot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(0.85); } }
+    .theme-toggle {
+      width: 40px; height: 40px; border-radius: 10px;
+      border: 1px solid var(--border-default); background: var(--bg-elevated);
+      color: var(--text-secondary); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all var(--transition-fast);
+    }
+    .theme-toggle:hover { border-color: var(--border-brand); color: var(--text-brand); background: var(--bg-hover); }
+    .theme-toggle svg { width: 18px; height: 18px; }
+    .icon-sun { display: none; }
+    .icon-moon { display: block; }
+    [data-theme="light"] .icon-sun { display: block; }
+    [data-theme="light"] .icon-moon { display: none; }
+
+    /* =====================================================
+       MAIN
+    ===================================================== */
+    .main-area { max-width: 1280px; margin: 0 auto; padding: 2rem 1.5rem 4rem; width: 100%; }
+
+    /* =====================================================
+       HERO
+    ===================================================== */
+    .hero {
+      display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+      margin-bottom: 2rem; padding: 1.75rem 2rem;
+      border-radius: 20px; border: 1px solid var(--border-default);
+      background: var(--bg-surface); box-shadow: var(--shadow-md);
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: ''; position: absolute; top: -80px; right: -60px;
+      width: 280px; height: 280px; border-radius: 50%;
+      background: radial-gradient(circle, var(--brand-glow) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-content { position: relative; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.25rem 0.75rem; border-radius: 9999px;
+      background: hsla(248, 80%, 62%, 0.12); border: 1px solid var(--border-brand);
+      color: var(--text-brand); font-size: 0.7rem; font-weight: 600;
+      letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 0.75rem;
+    }
+    .hero-title { font-size: 1.625rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.2; color: var(--text-primary); margin-bottom: 0.5rem; }
+    .hero-desc { font-size: 0.85rem; color: var(--text-secondary); max-width: 480px; }
+    .hero-stats { display: flex; gap: 1.25rem; position: relative; flex-shrink: 0; }
+    .stat-item { text-align: center; padding: 0.875rem 1.25rem; border-radius: 14px; border: 1px solid var(--border-default); background: var(--bg-elevated); }
+    .stat-value { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.04em; color: var(--text-brand); font-family: var(--font-mono); }
+    .stat-label { font-size: 0.65rem; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 0.125rem; }
+
+    /* =====================================================
+       TABS
+    ===================================================== */
+    .tabs-wrapper {
+      display: flex; gap: 0.375rem; padding: 0.375rem;
+      background: var(--bg-surface); border: 1px solid var(--border-default);
+      border-radius: 16px; margin-bottom: 1.75rem; box-shadow: var(--shadow-sm);
+    }
+    .tab-btn {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.625rem 1.125rem; border-radius: 11px;
+      border: none; background: transparent; color: var(--text-secondary);
+      font-size: 0.8rem; font-weight: 500; font-family: var(--font-sans);
+      cursor: pointer; transition: all var(--transition-fast);
+      white-space: nowrap; flex: 1; justify-content: center;
+    }
+    .tab-btn:hover { color: var(--text-primary); background: var(--bg-elevated); }
+    .tab-btn.active { background: var(--brand); color: white; box-shadow: 0 2px 12px var(--brand-glow); }
+    .tab-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+    /* =====================================================
+       CARDS
+    ===================================================== */
+    .card {
+      background: var(--bg-surface); border: 1px solid var(--border-default);
+      border-radius: 20px; padding: 1.5rem; box-shadow: var(--shadow-md);
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+    .card:hover { border-color: var(--border-strong); }
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1.25rem; }
+    .card-label { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.25rem; }
+    .card-title { font-size: 1.05rem; font-weight: 700; color: var(--text-primary); letter-spacing: -0.02em; }
+    .card-desc { font-size: 0.775rem; color: var(--text-secondary); margin-top: 0.25rem; line-height: 1.5; }
+
+    /* =====================================================
+       FORM ELEMENTS
+    ===================================================== */
+    .field-label { display: block; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem; }
+    .input, .textarea, .select {
+      width: 100%; background: var(--bg-input); border: 1px solid var(--border-default);
+      border-radius: 12px; padding: 0.75rem 1rem; color: var(--text-primary);
+      font-size: 0.875rem; font-family: var(--font-mono);
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast); outline: none;
+    }
+    .input::placeholder, .textarea::placeholder { color: var(--text-muted); font-family: var(--font-sans); }
+    .input:focus, .textarea:focus, .select:focus { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-glow); }
+    .textarea { resize: none; line-height: 1.6; }
+    .output-textarea { color: var(--text-code); background: var(--bg-elevated); cursor: default; }
+    select.input { font-family: var(--font-sans); }
+
+    /* =====================================================
+       BUTTONS
+    ===================================================== */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+      padding: 0.65rem 1.25rem; border-radius: 12px; border: none;
+      font-size: 0.825rem; font-weight: 600; font-family: var(--font-sans);
+      cursor: pointer; transition: all var(--transition-fast); white-space: nowrap;
+    }
+    .btn svg { width: 15px; height: 15px; }
+    .btn-primary { background: linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%); color: white; box-shadow: 0 2px 12px var(--brand-glow); }
+    .btn-primary:hover { background: linear-gradient(135deg, var(--brand-light) 0%, var(--brand) 100%); box-shadow: 0 4px 20px var(--brand-glow); transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-secondary { background: var(--bg-elevated); color: var(--text-secondary); border: 1px solid var(--border-default); }
+    .btn-secondary:hover { background: var(--bg-hover); color: var(--text-primary); border-color: var(--border-strong); }
+    .btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid transparent; padding: 0.4rem 0.75rem; font-size: 0.75rem; }
+    .btn-ghost:hover { background: var(--bg-elevated); color: var(--text-primary); border-color: var(--border-default); }
+    .btn-brand-ghost { background: hsla(248, 80%, 62%, 0.1); color: var(--text-brand); border: 1px solid var(--border-brand); padding: 0.4rem 0.75rem; font-size: 0.75rem; }
+    .btn-brand-ghost:hover { background: hsla(248, 80%, 62%, 0.18); }
+    .btn-violet { background: linear-gradient(135deg, var(--accent-violet) 0%, var(--brand) 100%); color: white; box-shadow: 0 2px 12px hsla(270, 80%, 65%, 0.3); }
+    .btn-violet:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-full { width: 100%; }
+
+    /* Cipher Pills */
+    .cipher-pills { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .cipher-pill {
+      padding: 0.45rem 1rem; border-radius: 9999px; border: 1px solid var(--border-default);
+      background: var(--bg-elevated); color: var(--text-secondary);
+      font-size: 0.775rem; font-weight: 600; cursor: pointer; font-family: var(--font-sans);
+      transition: all var(--transition-fast);
+    }
+    .cipher-pill:hover { border-color: var(--border-brand); color: var(--text-brand); background: hsla(248, 80%, 62%, 0.08); }
+    .cipher-pill.active { background: var(--brand); border-color: var(--brand); color: white; box-shadow: 0 2px 10px var(--brand-glow); }
+
+    /* Shift Control */
+    .shift-block { background: var(--bg-elevated); border: 1px solid var(--border-default); border-radius: 16px; padding: 1.125rem 1.25rem; }
+    .shift-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.875rem; }
+    .shift-counter { display: flex; align-items: center; gap: 0.5rem; }
+    .shift-num { font-family: var(--font-mono); font-size: 1rem; font-weight: 700; color: var(--text-brand); background: hsla(248, 80%, 62%, 0.12); border: 1px solid var(--border-brand); border-radius: 8px; min-width: 2.5rem; text-align: center; padding: 0.2rem 0.5rem; }
+    .shift-btn { width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border-default); background: var(--bg-surface); color: var(--text-primary); font-size: 1rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all var(--transition-fast); font-family: var(--font-sans); }
+    .shift-btn:hover { background: var(--bg-hover); border-color: var(--border-brand); color: var(--text-brand); }
+    input[type="range"] { width: 100%; height: 5px; border-radius: 9999px; appearance: none; background: var(--border-strong); cursor: pointer; outline: none; }
+    input[type="range"]::-webkit-slider-thumb { appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--brand); box-shadow: 0 0 8px var(--brand-glow); cursor: pointer; transition: transform var(--transition-fast); }
+    input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+    .range-labels { display: flex; justify-content: space-between; margin-top: 0.375rem; }
+    .range-labels span { font-size: 0.65rem; font-family: var(--font-mono); color: var(--text-muted); }
+
+    /* Alphabet wheel */
+    .alphabet-block { background: var(--bg-elevated); border: 1px solid var(--border-default); border-radius: 16px; padding: 1.125rem 1.25rem; }
+    .alpha-row { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.15em; line-height: 1.8; overflow-x: auto; white-space: nowrap; }
+    .alpha-plain { color: var(--text-secondary); }
+    .alpha-cipher { color: var(--text-brand); font-weight: 700; }
+    .alpha-formula { margin-top: 0.5rem; font-size: 0.7rem; color: var(--text-muted); font-family: var(--font-mono); }
+    .alpha-formula span { color: var(--text-brand); }
+
+    /* Chart */
+    .chart-wrapper { position: relative; height: 240px; padding: 0.25rem 0; }
+
+    /* Cracker Results */
+    .result-hero { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; padding: 1.25rem; border-radius: 14px; border: 1px solid var(--border-brand); background: hsla(248, 80%, 62%, 0.06); margin-bottom: 1.25rem; }
+    .result-badge { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-brand); margin-bottom: 0.375rem; }
+    .result-title { font-size: 1.2rem; font-weight: 800; letter-spacing: -0.02em; color: var(--text-primary); }
+    .chi-score { text-align: right; flex-shrink: 0; }
+    .chi-label { font-size: 0.65rem; color: var(--text-muted); margin-bottom: 0.25rem; }
+    .chi-value { font-family: var(--font-mono); font-size: 1.5rem; font-weight: 700; color: var(--accent-emerald); }
+    .result-text-block { background: var(--bg-input); border: 1px solid var(--border-default); border-radius: 12px; padding: 1rem 1.125rem; font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-primary); line-height: 1.6; white-space: pre-wrap; word-break: break-word; margin-bottom: 1.25rem; }
+    .crack-table-wrap { border: 1px solid var(--border-default); border-radius: 14px; overflow: hidden; max-height: 360px; overflow-y: auto; }
+    .crack-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+    .crack-table thead { background: var(--bg-elevated); position: sticky; top: 0; z-index: 1; }
+    .crack-table th { padding: 0.75rem 1rem; text-align: left; font-weight: 600; font-size: 0.7rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--border-default); font-family: var(--font-sans); }
+    .crack-table td { padding: 0.65rem 1rem; color: var(--text-secondary); border-bottom: 1px solid var(--border-subtle); font-family: var(--font-mono); }
+    .crack-table tbody tr { transition: background var(--transition-fast); }
+    .crack-table tbody tr:hover { background: var(--bg-hover); }
+    .crack-table tbody tr.top-row { background: hsla(248, 80%, 62%, 0.06); }
+    .crack-table tbody tr.top-row td { color: var(--text-brand); font-weight: 600; }
+    .crack-table td:last-child { font-family: var(--font-sans); }
+
+    /* File Upload */
+    .upload-zone { border: 2px dashed var(--border-strong); border-radius: 16px; padding: 2.5rem 1.5rem; text-align: center; cursor: pointer; transition: all var(--transition-base); }
+    .upload-zone:hover, .upload-zone.drag-over { border-color: var(--brand); background: hsla(248, 80%, 62%, 0.04); }
+    .upload-icon { color: var(--text-muted); margin-bottom: 0.75rem; }
+    .upload-icon svg { width: 40px; height: 40px; }
+    .upload-text { font-size: 0.875rem; color: var(--text-secondary); font-weight: 500; }
+    .upload-subtext { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem; }
+    .upload-zone input { display: none; }
+
+    /* Grid */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    .space-y-4 > * + * { margin-top: 1rem; }
+    .space-y-5 > * + * { margin-top: 1.25rem; }
+    .space-y-6 > * + * { margin-top: 1.5rem; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; animation: fadeIn 0.2s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .divider { height: 1px; background: var(--border-subtle); margin: 1.25rem 0; }
+
+    /* Toast */
+    .toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.5rem; }
+    .toast { display: flex; align-items: center; gap: 0.625rem; padding: 0.75rem 1.125rem; border-radius: 12px; border: 1px solid var(--border-default); background: var(--glass-bg); backdrop-filter: blur(20px); box-shadow: var(--shadow-lg); font-size: 0.825rem; font-weight: 500; color: var(--text-primary); animation: slideToast 0.3s ease; max-width: 320px; font-family: var(--font-sans); }
+    @keyframes slideToast { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+
+    /* Utilities */
+    .flex { display: flex; }
+    .items-center { align-items: center; }
+    .items-start { align-items: flex-start; }
+    .justify-between { justify-content: space-between; }
+    .gap-2 { gap: 0.5rem; }
+    .gap-3 { gap: 0.75rem; }
+    .gap-4 { gap: 1rem; }
+    .hidden { display: none !important; }
+    .mt-4 { margin-top: 1rem; }
+    .w-full { width: 100%; }
+    .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 280px; }
+
+    @media (max-width: 900px) {
+      .grid-2 { grid-template-columns: 1fr; }
+      .hero { flex-direction: column; align-items: flex-start; }
+      .hero-stats { flex-wrap: wrap; gap: 0.75rem; }
+      .tabs-wrapper { flex-wrap: wrap; }
+      .tab-btn { flex: initial; }
+    }
+    @media (max-width: 600px) {
+      .main-area { padding: 1rem 1rem 3rem; }
+      .header-inner { padding: 0 1rem; }
+      .status-pill { display: none; }
     }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased selection:bg-indigo-500 selection:text-white">
+<body>
 
-  <!-- Header -->
-  <header class="border-b border-slate-800 bg-slate-900/70 backdrop-blur sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
-          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-inner">
+      <a href="/" class="logo">
+        <div class="logo-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
           </svg>
         </div>
         <div>
-          <h1 class="font-bold text-lg leading-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">Secure End-to-End Encrypted Chat</h1>
-          <p class="text-xs text-indigo-400 font-medium">FastAPI & Cryptanalysis Engine</p>
+          <div class="logo-title">CryptSuite</div>
+          <div class="logo-sub">Cryptanalysis Engine v2.0</div>
         </div>
-      </div>
-      <div class="flex items-center space-x-4">
-        <a href="/docs" target="_blank" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700 transition flex items-center gap-1.5">
-          <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-          Interactive API Docs
+      </a>
+      <div class="header-actions">
+        <div class="status-pill">
+          <span class="status-dot"></span>
+          API Live
+        </div>
+        <a href="/docs" target="_blank" class="btn-docs">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          API Docs
         </a>
+        <button class="theme-toggle" id="themeToggle" title="Toggle light/dark mode" onclick="toggleTheme()">
+          <svg class="icon-sun" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 3v1m0 16v1m8.66-13H20M4 12H3m15.36 6.36l-.71-.71M6.34 6.34l-.71-.71M18.36 6.36l-.71-.71M6.34 17.66l-.71-.71M12 5a7 7 0 100 14A7 7 0 0012 5z"/>
+          </svg>
+          <svg class="icon-moon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+          </svg>
+        </button>
       </div>
     </div>
   </header>
 
-  <!-- Main Container -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+  <!-- MAIN -->
+  <main class="main-area">
 
-    <!-- Cipher Navigation Tabs -->
-    <div class="flex border-b border-slate-800 space-x-8 text-sm font-medium">
-      <button onclick="switchTab('caesar')" id="tab-caesar" class="py-3 px-1 border-b-2 border-indigo-500 text-indigo-400 transition flex items-center gap-2">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
-        Caesar Cipher
-      </button>
-      <button onclick="switchTab('cracker')" id="tab-cracker" class="py-3 px-1 border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition flex items-center gap-2">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-        Smart Brute-Force Cracker
-      </button>
-      <button onclick="switchTab('extended')" id="tab-extended" class="py-3 px-1 border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition flex items-center gap-2">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-        Multi-Cipher (Vigenère / Atbash / ROT13)
-      </button>
-      <button onclick="switchTab('files')" id="tab-files" class="py-3 px-1 border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition flex items-center gap-2">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
-        File Processing
-      </button>
+    <!-- Hero -->
+    <div class="hero">
+      <div class="hero-content">
+        <div class="hero-badge">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          Classical Cryptography Suite v2.0
+        </div>
+        <h1 class="hero-title">Encrypt, Decrypt & Crack Ciphers</h1>
+        <p class="hero-desc">Interactive playground with letter frequency analysis, smart brute-force cracking, multi-cipher support, and file processing.</p>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item"><div class="stat-value">26</div><div class="stat-label">Shift Keys</div></div>
+        <div class="stat-item"><div class="stat-value">4</div><div class="stat-label">Ciphers</div></div>
+        <div class="stat-item"><div class="stat-value">χ²</div><div class="stat-label">Analysis</div></div>
+      </div>
     </div>
 
-    <!-- TAB 1: CAESAR CIPHER PLAYGROUND -->
-    <section id="panel-caesar" class="space-y-6">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
-        <!-- Left: Input & Shift Controls -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
-          <div class="flex items-center justify-between">
-            <span class="text-sm font-semibold uppercase tracking-wider text-slate-400">Input Message</span>
-            <div class="flex items-center space-x-2">
-              <button onclick="clearText()" class="text-xs text-slate-400 hover:text-slate-200 px-2 py-1 rounded bg-slate-800">Clear</button>
-              <button onclick="swapText()" class="text-xs text-indigo-400 hover:text-indigo-300 px-2 py-1 rounded bg-indigo-950/60 border border-indigo-800 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path></svg>
-                Swap
+    <!-- Tab Navigation -->
+    <nav class="tabs-wrapper" role="tablist">
+      <button class="tab-btn active" id="tab-caesar" role="tab" onclick="switchTab('caesar')">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+        Caesar Cipher
+      </button>
+      <button class="tab-btn" id="tab-cracker" role="tab" onclick="switchTab('cracker')">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        Brute-Force Cracker
+      </button>
+      <button class="tab-btn" id="tab-extended" role="tab" onclick="switchTab('extended')">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+        Multi-Cipher
+      </button>
+      <button class="tab-btn" id="tab-files" role="tab" onclick="switchTab('files')">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+        File Processing
+      </button>
+    </nav>
+
+    <!-- ====================================================
+         TAB 1: CAESAR CIPHER
+    ==================================================== -->
+    <section class="tab-panel active" id="panel-caesar" role="tabpanel">
+      <div class="grid-2" style="align-items:start; margin-bottom:1.5rem;">
+
+        <!-- Input Card -->
+        <div class="card space-y-4">
+          <div class="card-header">
+            <div>
+              <div class="card-label">Step 1</div>
+              <div class="card-title">Input Message</div>
+            </div>
+            <div class="flex gap-2">
+              <button class="btn btn-ghost" onclick="clearText()">
+                <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                Clear
+              </button>
+              <button class="btn btn-brand-ghost" onclick="swapText()">
+                <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
+                Swap ↕
               </button>
             </div>
           </div>
 
-          <textarea id="caesarInput" rows="5" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono text-sm resize-none placeholder-slate-600" placeholder="Type or paste your text here (e.g. Hello, World!)...">The quick brown fox jumps over the lazy dog.</textarea>
+          <textarea id="caesarInput" rows="5" class="textarea input"
+            placeholder="Type or paste your text here…">The quick brown fox jumps over the lazy dog.</textarea>
 
-          <!-- Shift Slider -->
-          <div class="bg-slate-950 border border-slate-800/80 rounded-xl p-4 space-y-3">
-            <div class="flex items-center justify-between">
-              <label for="shiftRange" class="text-xs font-semibold uppercase text-slate-400">Shift Key (k)</label>
-              <div class="flex items-center space-x-2">
-                <button onclick="decrementShift()" class="w-7 h-7 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center justify-center font-bold">-</button>
-                <span id="shiftDisplay" class="font-mono text-base font-bold text-indigo-400 px-3 py-0.5 rounded bg-indigo-950 border border-indigo-800/60 min-w-10 text-center">3</span>
-                <button onclick="incrementShift()" class="w-7 h-7 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center justify-center font-bold">+</button>
+          <div class="shift-block">
+            <div class="shift-header">
+              <label class="field-label" style="margin:0" for="shiftRange">Shift Key (k)</label>
+              <div class="shift-counter">
+                <button class="shift-btn" onclick="decrementShift()">−</button>
+                <span id="shiftDisplay" class="shift-num">3</span>
+                <button class="shift-btn" onclick="incrementShift()">+</button>
               </div>
             </div>
-            <input type="range" id="shiftRange" min="0" max="25" value="3" class="w-full accent-indigo-500 cursor-pointer" oninput="onShiftSliderChange(this.value)">
-            <div class="flex justify-between text-[11px] text-slate-500 font-mono">
-              <span>0 (A)</span>
-              <span>13 (ROT13)</span>
-              <span>25 (Z)</span>
+            <input type="range" id="shiftRange" min="0" max="25" value="3" oninput="onShiftSliderChange(this.value)">
+            <div class="range-labels">
+              <span>0 (A)</span><span>13 (ROT13)</span><span>25 (Z)</span>
             </div>
           </div>
 
-          <!-- Action Buttons -->
-          <div class="grid grid-cols-2 gap-4">
-            <button onclick="runCaesar('encrypt')" class="w-full py-3 px-4 rounded-xl font-medium bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white shadow-lg shadow-indigo-600/30 transition flex items-center justify-center gap-2">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+          <div class="flex gap-3">
+            <button class="btn btn-primary" style="flex:1" onclick="runCaesar('encrypt')">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
               Encrypt
             </button>
-            <button onclick="runCaesar('decrypt')" class="w-full py-3 px-4 rounded-xl font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center justify-center gap-2">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"></path></svg>
+            <button class="btn btn-secondary" style="flex:1" onclick="runCaesar('decrypt')">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
               Decrypt
             </button>
           </div>
         </div>
 
-        <!-- Right: Live Output & Alphabet Mapping -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5 flex flex-col justify-between">
-          <div class="space-y-4">
-            <div class="flex items-center justify-between">
-              <span class="text-sm font-semibold uppercase tracking-wider text-slate-400">Result Output</span>
-              <button onclick="copyOutput()" class="text-xs text-indigo-400 hover:text-indigo-300 px-3 py-1 rounded bg-indigo-950/60 border border-indigo-800 flex items-center gap-1.5 transition">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+        <!-- Output Card -->
+        <div class="card space-y-4" style="display:flex;flex-direction:column;justify-content:space-between;">
+          <div>
+            <div class="card-header">
+              <div>
+                <div class="card-label">Step 2</div>
+                <div class="card-title">Result Output</div>
+              </div>
+              <button class="btn btn-brand-ghost" onclick="copyOutput()">
+                <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                 <span id="copyBtnLabel">Copy</span>
               </button>
             </div>
-
-            <textarea id="caesarOutput" rows="5" readonly class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-indigo-300 font-mono text-sm resize-none focus:outline-none" placeholder="Encrypted/decrypted output will appear here..."></textarea>
+            <textarea id="caesarOutput" rows="5" readonly class="textarea output-textarea"
+              placeholder="Encrypted/decrypted output will appear here…"></textarea>
           </div>
 
-          <!-- Alphabet Shift Wheel Map -->
-          <div class="bg-slate-950 border border-slate-800/80 rounded-xl p-4 space-y-2">
-            <div class="flex justify-between items-center text-xs font-semibold text-slate-400 uppercase">
-              <span>Plain Alphabet</span>
-              <span>Cipher Alphabet</span>
+          <div class="alphabet-block">
+            <div class="flex justify-between items-center" style="margin-bottom:0.625rem;">
+              <span class="field-label" style="margin:0">Plain Alphabet</span>
+              <span class="field-label" style="margin:0;color:var(--text-brand);">Cipher Alphabet</span>
             </div>
-            <div class="overflow-x-auto py-1">
-              <div class="font-mono text-xs tracking-wider space-y-1">
-                <div class="text-slate-400">A B C D E F G H I J K L M N O P Q R S T U V W X Y Z</div>
-                <div id="cipherAlphabetDisplay" class="text-indigo-400 font-bold">D E F G H I J K L M N O P Q R S T U V W X Y Z A B C</div>
-              </div>
-            </div>
-            <p class="text-[11px] text-slate-500 font-mono">Formula: <span class="text-indigo-400">C = (P + k) mod 26</span></p>
+            <div class="alpha-row alpha-plain">A B C D E F G H I J K L M N O P Q R S T U V W X Y Z</div>
+            <div class="alpha-row alpha-cipher" id="cipherAlphabetDisplay">D E F G H I J K L M N O P Q R S T U V W X Y Z A B C</div>
+            <div class="alpha-formula">Formula: <span>C = (P + k) mod 26</span></div>
           </div>
         </div>
       </div>
 
-      <!-- Live Frequency Histogram -->
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-        <div class="flex items-center justify-between">
+      <!-- Frequency Chart -->
+      <div class="card">
+        <div class="card-header">
           <div>
-            <h3 class="text-base font-semibold text-slate-200">Letter Frequency Analysis</h3>
-            <p class="text-xs text-slate-400">Compare current text distribution against standard English frequencies (ETAOIN)</p>
+            <div class="card-label">Cryptanalysis</div>
+            <div class="card-title">Letter Frequency Analysis</div>
+            <div class="card-desc">Compare text distribution against standard English frequencies (ETAOIN SHRDLU)</div>
           </div>
-          <button onclick="updateFrequencyChart()" class="text-xs text-slate-300 bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg border border-slate-700">Refresh Chart</button>
+          <button class="btn btn-secondary" onclick="updateFrequencyChart()">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            Refresh Chart
+          </button>
         </div>
-        <div class="h-64">
+        <div class="chart-wrapper">
           <canvas id="freqChart"></canvas>
         </div>
       </div>
     </section>
 
-    <!-- TAB 2: SMART BRUTE FORCE CRACKER -->
-    <section id="panel-cracker" class="hidden space-y-6">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+    <!-- ====================================================
+         TAB 2: BRUTE-FORCE CRACKER
+    ==================================================== -->
+    <section class="tab-panel" id="panel-cracker" role="tabpanel">
+      <div class="card space-y-5" style="margin-bottom:1.5rem;">
         <div>
-          <h2 class="text-lg font-bold text-slate-100">Smart English Brute-Force Cracker</h2>
-          <p class="text-xs text-slate-400">Automatically tests all 25 shift variations, calculates Chi-Squared letter distribution match, and identifies standard English dictionary words.</p>
+          <div class="card-label">Automated Cryptanalysis</div>
+          <div class="card-title">Smart English Brute-Force Cracker</div>
+          <div class="card-desc">Tests all 25 shift variants, scores with Chi-Squared letter distribution, and identifies the most likely English plaintext automatically.</div>
         </div>
-
-        <div class="space-y-2">
-          <label class="text-xs font-semibold uppercase text-slate-400">Ciphertext to Crack</label>
-          <textarea id="crackInput" rows="3" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-slate-200 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-slate-600" placeholder="Paste an unknown Caesar ciphertext...">Wkh txlfn eurzq ira mxpsv ryhu wkh odcb grj.</textarea>
+        <div>
+          <label class="field-label" for="crackInput">Ciphertext to Crack</label>
+          <textarea id="crackInput" rows="4" class="textarea input"
+            placeholder="Paste an unknown Caesar ciphertext here…">Wkh txlfn eurzq ira mxpsv ryhu wkh odcb grj.</textarea>
         </div>
-
-        <button onclick="runAutoCrack()" class="py-2.5 px-5 rounded-xl font-medium bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white shadow-lg shadow-indigo-600/30 transition flex items-center gap-2">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-          Crack Cipher
+        <button class="btn btn-violet" onclick="runAutoCrack()" id="crackBtn">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          <span id="crackBtnLabel">Crack Cipher</span>
         </button>
       </div>
 
-      <!-- Cracking Results -->
-      <div id="crackResultsCard" class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+      <div id="crackResultsCard" class="card space-y-4 hidden">
+        <div>
+          <div class="card-label" style="margin-bottom:0.25rem;">Analysis Complete</div>
+          <div class="card-title">Best Match Found</div>
+        </div>
+
+        <div class="result-hero">
           <div>
-            <span class="text-xs uppercase font-bold text-indigo-400 tracking-wider">Top Detected Match</span>
-            <h3 id="bestMatchTitle" class="text-xl font-bold text-slate-100 mt-1">Shift 3 (Confidence: High)</h3>
+            <div class="result-badge">Top Candidate</div>
+            <div class="result-title" id="bestMatchTitle">Shift 3 — High Confidence</div>
           </div>
-          <div class="text-right">
-            <span class="text-xs text-slate-400">Chi-Squared Score</span>
-            <div id="bestScore" class="font-mono text-lg font-bold text-emerald-400">12.4</div>
+          <div class="chi-score">
+            <div class="chi-label">Chi-Squared Score</div>
+            <div class="chi-value" id="bestScore">12.4</div>
           </div>
         </div>
 
-        <div class="bg-slate-950 border border-slate-800 rounded-xl p-4">
-          <p id="bestDecryptedText" class="font-mono text-slate-200 text-sm whitespace-pre-wrap"></p>
-        </div>
+        <div class="result-text-block" id="bestDecryptedText"></div>
 
-        <!-- Full Table of All 25 Shifts -->
-        <div class="pt-4 space-y-3">
-          <h4 class="text-sm font-semibold text-slate-300">All 25 Possible Decryptions (Ranked)</h4>
-          <div class="overflow-x-auto max-h-96 border border-slate-800 rounded-xl">
-            <table class="w-full text-left text-xs font-mono">
-              <thead class="bg-slate-950 text-slate-400 border-b border-slate-800 sticky top-0">
+        <div>
+          <div class="flex justify-between items-center" style="margin-bottom:0.75rem;">
+            <div class="card-label" style="margin:0;">All 25 Decryption Candidates</div>
+            <span style="font-size:0.68rem;color:var(--text-muted);">Ranked by Chi-Squared score</span>
+          </div>
+          <div class="crack-table-wrap">
+            <table class="crack-table">
+              <thead>
                 <tr>
-                  <th class="py-2.5 px-3">Rank</th>
-                  <th class="py-2.5 px-3">Shift Key</th>
-                  <th class="py-2.5 px-3">Score</th>
-                  <th class="py-2.5 px-3">Decrypted Candidate</th>
-                  <th class="py-2.5 px-3 text-right">Action</th>
+                  <th>Rank</th><th>Shift Key</th><th>Chi² Score</th>
+                  <th>Decrypted Candidate</th><th style="text-align:right">Action</th>
                 </tr>
               </thead>
-              <tbody id="crackTableBody" class="divide-y divide-slate-800/60 bg-slate-900/60">
-              </tbody>
+              <tbody id="crackTableBody"></tbody>
             </table>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- TAB 3: EXTENDED CIPHERS -->
-    <section id="panel-extended" class="hidden space-y-6">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+    <!-- ====================================================
+         TAB 3: MULTI-CIPHER
+    ==================================================== -->
+    <section class="tab-panel" id="panel-extended" role="tabpanel">
+      <div class="card space-y-5">
         <div>
-          <h2 class="text-lg font-bold text-slate-100">Extended Classical Ciphers</h2>
-          <p class="text-xs text-slate-400">Switch between Vigenère (polyalphabetic), Atbash (inversion), and ROT13.</p>
+          <div class="card-label">Polyalphabetic & Special</div>
+          <div class="card-title">Extended Classical Ciphers</div>
+          <div class="card-desc">Vigenère (polyalphabetic keyword), Atbash (alphabetic inversion, symmetric), and ROT13 (self-inverse shift-13).</div>
         </div>
 
-        <div class="flex flex-wrap gap-3">
-          <button onclick="selectExtendedCipher('vigenere')" id="btn-vigenere" class="px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 text-white border border-indigo-500 transition">Vigenère Cipher</button>
-          <button onclick="selectExtendedCipher('atbash')" id="btn-atbash" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700 transition">Atbash Cipher</button>
-          <button onclick="selectExtendedCipher('rot13')" id="btn-rot13" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700 transition">ROT13 Cipher</button>
+        <div class="cipher-pills">
+          <button class="cipher-pill active" id="btn-vigenere" onclick="selectExtendedCipher('vigenere')">Vigenère Cipher</button>
+          <button class="cipher-pill" id="btn-atbash" onclick="selectExtendedCipher('atbash')">Atbash Cipher</button>
+          <button class="cipher-pill" id="btn-rot13" onclick="selectExtendedCipher('rot13')">ROT13</button>
         </div>
 
-        <div class="space-y-4">
-          <div id="vigenereKeyGroup" class="space-y-1">
-            <label class="text-xs font-semibold uppercase text-slate-400">Key Word (e.g. SECRET)</label>
-            <input type="text" id="extKey" value="KEY" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-slate-200 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 uppercase" placeholder="Enter keyword...">
-          </div>
+        <div class="divider"></div>
 
-          <div class="space-y-1">
-            <label class="text-xs font-semibold uppercase text-slate-400">Message Text</label>
-            <textarea id="extInput" rows="4" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-slate-200 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Enter message...">Attack at dawn!</textarea>
-          </div>
+        <div id="vigenereKeyGroup">
+          <label class="field-label" for="extKey">Keyword (alphabetic)</label>
+          <input type="text" id="extKey" value="KEY" class="input" placeholder="e.g. SECRET" style="text-transform:uppercase;">
+        </div>
 
-          <div class="flex items-center space-x-4">
-            <button onclick="runExtendedCipher(false)" class="py-2.5 px-6 rounded-xl font-medium bg-indigo-600 hover:bg-indigo-500 text-white transition">Encrypt</button>
-            <button onclick="runExtendedCipher(true)" id="btnExtDecrypt" class="py-2.5 px-6 rounded-xl font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">Decrypt</button>
-          </div>
+        <div>
+          <label class="field-label" for="extInput">Message Text</label>
+          <textarea id="extInput" rows="4" class="textarea input" placeholder="Enter your message…">Attack at dawn!</textarea>
+        </div>
 
-          <div class="space-y-1 pt-3">
-            <label class="text-xs font-semibold uppercase text-slate-400">Output</label>
-            <textarea id="extOutput" rows="4" readonly class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-indigo-300 font-mono text-sm focus:outline-none" placeholder="Result will appear here..."></textarea>
-          </div>
+        <div class="flex gap-3">
+          <button class="btn btn-primary" style="flex:1" onclick="runExtendedCipher(false)">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            Encrypt
+          </button>
+          <button class="btn btn-secondary" id="btnExtDecrypt" style="flex:1" onclick="runExtendedCipher(true)">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
+            Decrypt
+          </button>
+        </div>
+
+        <div>
+          <label class="field-label" for="extOutput">Output</label>
+          <textarea id="extOutput" rows="4" readonly class="textarea output-textarea"
+            placeholder="Result will appear here…"></textarea>
         </div>
       </div>
     </section>
 
-    <!-- TAB 4: FILE PROCESSING -->
-    <section id="panel-files" class="hidden space-y-6">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6 max-w-2xl">
-        <div>
-          <h2 class="text-lg font-bold text-slate-100">File Encryption & Decryption</h2>
-          <p class="text-xs text-slate-400">Encrypt or decrypt any plain text (.txt) file using the Caesar cipher and download the result directly.</p>
+    <!-- ====================================================
+         TAB 4: FILE PROCESSING
+    ==================================================== -->
+    <section class="tab-panel" id="panel-files" role="tabpanel">
+      <div class="grid-2" style="align-items:start;">
+        <div class="card space-y-5">
+          <div>
+            <div class="card-label">Caesar Cipher</div>
+            <div class="card-title">File Encryption & Decryption</div>
+            <div class="card-desc">Encrypt or decrypt .txt, .csv, or .md files using Caesar cipher and download the result instantly.</div>
+          </div>
+
+          <form id="fileForm" onsubmit="handleFileUpload(event)" class="space-y-5">
+            <div class="upload-zone" id="uploadZone"
+              onclick="document.getElementById('fileUploadInput').click()"
+              ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+              <div class="upload-icon">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+              </div>
+              <div class="upload-text" id="fileChosenLabel">Click or drag &amp; drop a file</div>
+              <div class="upload-subtext">Supports .txt · .csv · .md</div>
+              <input type="file" id="fileUploadInput" accept=".txt,.csv,.md" onchange="onFileSelected(this)">
+            </div>
+
+            <div class="grid-2">
+              <div>
+                <label class="field-label" for="fileShift">Shift Key (0–25)</label>
+                <input type="number" id="fileShift" value="3" min="0" max="25" class="input">
+              </div>
+              <div>
+                <label class="field-label" for="fileOperation">Operation</label>
+                <select id="fileOperation" class="input select">
+                  <option value="encrypt">Encrypt</option>
+                  <option value="decrypt">Decrypt</option>
+                </select>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-full">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+              Process &amp; Download File
+            </button>
+          </form>
         </div>
 
-        <form id="fileForm" onsubmit="handleFileUpload(event)" class="space-y-4">
-          <div class="border-2 border-dashed border-slate-700 rounded-2xl p-6 text-center hover:border-indigo-500 transition cursor-pointer" onclick="document.getElementById('fileUploadInput').click()">
-            <svg class="mx-auto h-10 w-10 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
-            <p class="mt-2 text-sm text-slate-300" id="fileChosenLabel">Click to select a .txt file</p>
-            <input type="file" id="fileUploadInput" accept=".txt,.csv,.md" class="hidden" onchange="onFileSelected(this)">
-          </div>
-
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="text-xs font-semibold uppercase text-slate-400">Shift Key (0-25)</label>
-              <input type="number" id="fileShift" value="3" min="0" max="25" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200 font-mono text-sm">
+        <!-- Info Panel -->
+        <div class="card space-y-4">
+          <div class="card-label">How It Works</div>
+          <div class="space-y-4">
+            <div class="flex gap-3 items-start">
+              <div style="width:32px;height:32px;border-radius:10px;background:hsla(248,80%,62%,0.12);border:1px solid var(--border-brand);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <span style="font-size:0.75rem;font-weight:700;color:var(--text-brand);">1</span>
+              </div>
+              <div>
+                <div style="font-size:0.825rem;font-weight:600;color:var(--text-primary);margin-bottom:0.2rem;">Select a text file</div>
+                <div style="font-size:0.75rem;color:var(--text-secondary);">Supports .txt, .csv, .md. Contents read as UTF-8 text.</div>
+              </div>
             </div>
-            <div>
-              <label class="text-xs font-semibold uppercase text-slate-400">Operation</label>
-              <select id="fileOperation" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200 text-sm">
-                <option value="encrypt">Encrypt</option>
-                <option value="decrypt">Decrypt</option>
-              </select>
+            <div class="flex gap-3 items-start">
+              <div style="width:32px;height:32px;border-radius:10px;background:hsla(248,80%,62%,0.12);border:1px solid var(--border-brand);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <span style="font-size:0.75rem;font-weight:700;color:var(--text-brand);">2</span>
+              </div>
+              <div>
+                <div style="font-size:0.825rem;font-weight:600;color:var(--text-primary);margin-bottom:0.2rem;">Configure shift key</div>
+                <div style="font-size:0.75rem;color:var(--text-secondary);">Choose a value 0–25 and select encrypt or decrypt.</div>
+              </div>
+            </div>
+            <div class="flex gap-3 items-start">
+              <div style="width:32px;height:32px;border-radius:10px;background:hsla(248,80%,62%,0.12);border:1px solid var(--border-brand);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <span style="font-size:0.75rem;font-weight:700;color:var(--text-brand);">3</span>
+              </div>
+              <div>
+                <div style="font-size:0.825rem;font-weight:600;color:var(--text-primary);margin-bottom:0.2rem;">Download result</div>
+                <div style="font-size:0.75rem;color:var(--text-secondary);">Server processes and your browser auto-downloads the file.</div>
+              </div>
             </div>
           </div>
-
-          <button type="submit" class="w-full py-3 px-4 rounded-xl font-medium bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white shadow-lg shadow-indigo-600/30 transition flex items-center justify-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-            Process & Download File
-          </button>
-        </form>
+          <div class="divider"></div>
+          <div style="background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:12px;padding:0.875rem 1rem;">
+            <div style="font-size:0.7rem;font-weight:600;color:var(--accent-amber);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem;">⚠ Security Notice</div>
+            <div style="font-size:0.75rem;color:var(--text-secondary);line-height:1.6;">Caesar cipher is a classical demonstration — not suitable for real security. Use AES-256 or RSA for production systems.</div>
+          </div>
+        </div>
       </div>
     </section>
 
   </main>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
 
   <script src="/static/app.js"></script>
 </body>
