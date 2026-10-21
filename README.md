@@ -16,7 +16,7 @@ To explore cryptographic vulnerabilities, the application incorporates an automa
 
 ## 📐 System Architecture & Workflow
 
-![System Architecture & Execution Workflow](docs/system_workflow_architecture.png)
+![System Architecture & Execution Workflow](docs/system_workflow_diagram.png)
 
 ---
 
@@ -119,9 +119,7 @@ End-to-End Encrypted Chat/
 |
 +-- docs/                             # Project documentation & visual assets
 |   +-- ONBOARDING.md                 # Developer setup & architecture guide
-|   +-- system_workflow_architecture.png # High-resolution architecture diagram (2400x1500)
-|   +-- system_workflow_diagram.png   # Architectural overview infographic
-|   +-- architecture_workflow.svg     # Scalable vector graphics workflow diagram
+|   +-- system_workflow_diagram.png   # System architecture and workflow diagram
 |
 +-- requirements.txt                  # Production & test dependencies
 +-- README.md                         # Project overview (this file)
