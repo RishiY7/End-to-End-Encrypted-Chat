@@ -18,6 +18,18 @@ class TestCiphers(unittest.TestCase):
         self.assertEqual(caesar_shift("abc", 52), "abc")
         self.assertEqual(caesar_shift("abc", -1), "zab")
 
+    def test_caesar_non_ascii_preservation(self):
+        # Accented characters, numbers, and emojis should be preserved untouched
+        sample = "café 123! 🚀"
+        encrypted = caesar_shift(sample, 3)
+        self.assertEqual(encrypted, "fdih 123! 🚀")
+        decrypted = caesar_shift(encrypted, -3)
+        self.assertEqual(decrypted, sample)
+
+    def test_caesar_preserve_case_flag(self):
+        self.assertEqual(caesar_shift("Hello", 3, preserve_case=True), "Khoor")
+        self.assertEqual(caesar_shift("Hello", 3, preserve_case=False), "KHOOR")
+
     def test_smart_brute_force_cracker(self):
         secret = "The quick brown fox jumps over the lazy dog."
         encrypted = caesar_shift(secret, 5)
@@ -35,6 +47,13 @@ class TestCiphers(unittest.TestCase):
         self.assertEqual(freqs["A"]["count"], 3)
         self.assertEqual(freqs["B"]["count"], 0)
 
+    def test_frequency_analysis_non_ascii(self):
+        # Non-ASCII characters should not cause a KeyError
+        freqs = get_frequency_analysis("café")
+        self.assertEqual(freqs["C"]["count"], 1)
+        self.assertEqual(freqs["A"]["count"], 1)
+        self.assertEqual(freqs["F"]["count"], 1)
+
     def test_rot13(self):
         text = "Hello, World!"
         self.assertEqual(rot13(rot13(text)), text)
@@ -44,6 +63,10 @@ class TestCiphers(unittest.TestCase):
         self.assertEqual(atbash_cipher("abc"), "zyx")
         self.assertEqual(atbash_cipher("Attack at dawn!"), "Zggzxp zg wzdm!")
 
+    def test_atbash_non_ascii_preservation(self):
+        # Should preserve non-ASCII letters without crashing
+        self.assertEqual(atbash_cipher("café 123!"), "xzué 123!")
+
     def test_vigenere(self):
         text = "ATTACKATDAWN"
         key = "LEMON"
@@ -51,6 +74,13 @@ class TestCiphers(unittest.TestCase):
         self.assertEqual(encrypted, "LXFOPVEFRNHR")
         decrypted = vigenere_cipher(encrypted, key, decrypt=True)
         self.assertEqual(decrypted, text)
+
+    def test_vigenere_non_ascii_and_validation(self):
+        # Preserves non-ASCII and special characters
+        self.assertEqual(vigenere_cipher("café 123!", "KEY"), "rijé 123!")
+        # Empty or non-alphabetic key raises ValueError
+        with self.assertRaises(ValueError):
+            vigenere_cipher("Hello", "123!@#")
 
 
 if __name__ == "__main__":

@@ -4,6 +4,7 @@
 let currentShift = 3;
 let freqChart = null;
 let currentExtendedCipher = 'vigenere';
+let currentCandidates = [];
 
 const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
@@ -119,7 +120,7 @@ function updateAlphabetDisplay() {
 }
 
 // =====================================================
-// CLEAR & SWAP
+// CLEAR, SWAP & COPY HELPERS
 // =====================================================
 function clearText() {
   document.getElementById('caesarInput').value = '';
@@ -136,17 +137,59 @@ function swapText() {
   updateFrequencyChart();
 }
 
+function copyTextToClipboard(text, labelElementId, successMessage = 'Copied to clipboard!') {
+  if (!text) return;
+  const updateLabel = () => {
+    if (labelElementId) {
+      const label = document.getElementById(labelElementId);
+      if (label) {
+        label.innerText = 'Copied!';
+        setTimeout(() => { label.innerText = 'Copy'; }, 1800);
+      }
+    }
+    showToast(successMessage);
+  };
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(updateLabel).catch(() => {
+      fallbackCopyText(text, updateLabel);
+    });
+  } else {
+    fallbackCopyText(text, updateLabel);
+  }
+}
+
+function fallbackCopyText(text, onSuccess) {
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.top = '0';
+    ta.style.left = '0';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    const successful = document.execCommand('copy');
+    document.body.removeChild(ta);
+    if (successful && onSuccess) {
+      onSuccess();
+    } else if (!successful) {
+      showToast('Failed to copy', 'error');
+    }
+  } catch (err) {
+    showToast('Failed to copy', 'error');
+  }
+}
+
 function copyOutput() {
   const output = document.getElementById('caesarOutput').value;
-  if (!output) return;
-  navigator.clipboard.writeText(output).then(() => {
-    const label = document.getElementById('copyBtnLabel');
-    label.innerText = 'Copied!';
-    showToast('Output copied to clipboard!');
-    setTimeout(() => { label.innerText = 'Copy'; }, 1800);
-  }).catch(() => {
-    showToast('Failed to copy', 'error');
-  });
+  copyTextToClipboard(output, 'copyBtnLabel', 'Output copied to clipboard!');
+}
+
+function copyExtOutput() {
+  const output = document.getElementById('extOutput').value;
+  copyTextToClipboard(output, 'copyExtBtnLabel', 'Extended output copied!');
 }
 
 // =====================================================
@@ -258,7 +301,10 @@ async function updateFrequencyChart() {
 // =====================================================
 async function runAutoCrack() {
   const cipher = document.getElementById('crackInput').value.trim();
-  if (!cipher) return;
+  if (!cipher) {
+    showToast('Please enter ciphertext to crack', 'error');
+    return;
+  }
 
   const btn = document.getElementById('crackBtn');
   const label = document.getElementById('crackBtnLabel');
@@ -272,20 +318,26 @@ async function runAutoCrack() {
     const res = await fetch('/api/v1/caesar/brute-force', { method: 'POST', body: formData });
     const data = await res.json();
 
+    if (!res.ok) {
+      showToast(data.detail || 'Cracking failed', 'error');
+      return;
+    }
+
     const resultsCard = document.getElementById('crackResultsCard');
     resultsCard.classList.remove('hidden');
 
+    currentCandidates = data.candidates || [];
     const best = data.best_candidate;
     if (best) {
       document.getElementById('bestMatchTitle').innerText = `Shift ${best.shift} — ${best.confidence} Confidence`;
-      document.getElementById('bestScore').innerText = best.chi2_score.toFixed(2);
+      document.getElementById('bestScore').innerText = typeof best.chi2_score === 'number' ? best.chi2_score.toFixed(2) : best.chi2_score;
       document.getElementById('bestDecryptedText').innerText = best.decrypted_text;
     }
 
     const tbody = document.getElementById('crackTableBody');
     tbody.innerHTML = '';
 
-    data.candidates.forEach(cand => {
+    currentCandidates.forEach((cand, idx) => {
       const tr = document.createElement('tr');
       if (cand.rank === 1) tr.className = 'top-row';
 
@@ -295,7 +347,7 @@ async function runAutoCrack() {
         <td>${typeof cand.chi2_score === 'number' ? cand.chi2_score.toFixed(2) : cand.chi2_score}</td>
         <td class="truncate">${escapeHtml(cand.decrypted_text)}</td>
         <td style="text-align:right;">
-          <button onclick="useCandidateText('${escapeHtml(cand.decrypted_text).replace(/'/g, "\\'")}', ${cand.shift})"
+          <button onclick="loadCandidate(${idx})"
             style="font-size:0.72rem;padding:0.3rem 0.625rem;border-radius:7px;border:1px solid var(--border-default);background:var(--bg-elevated);color:var(--text-secondary);cursor:pointer;font-family:var(--font-sans);transition:all 0.15s ease;"
             onmouseover="this.style.borderColor='var(--border-brand)';this.style.color='var(--text-brand)';"
             onmouseout="this.style.borderColor='var(--border-default)';this.style.color='var(--text-secondary)';">
@@ -314,6 +366,12 @@ async function runAutoCrack() {
     btn.disabled = false;
     label.innerText = 'Crack Cipher';
   }
+}
+
+function loadCandidate(idx) {
+  const cand = currentCandidates[idx];
+  if (!cand) return;
+  useCandidateText(cand.decrypted_text, cand.shift);
 }
 
 function useCandidateText(text, shift) {
