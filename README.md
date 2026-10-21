@@ -20,7 +20,7 @@ To explore cryptographic vulnerabilities, the application incorporates an automa
 - **FastAPI Backend** — Fully typed REST API with Pydantic validation and interactive Swagger UI at `/docs`.
 - **Smart Brute-Force Cracker**
   - Tests all 25 shift possibilities automatically.
-  - Uses the **Chi-Squared (chi2) statistic** and English letter frequency analysis to rank candidates.
+  - Uses the **Chi-Squared ($\chi^2$) statistic** and English letter frequency analysis to rank candidates.
   - Confidence scoring: High / Medium / Low.
 - **Letter Frequency Analysis** — Live histogram comparing ciphertext distribution against standard English (ETAOIN).
 - **Extended Classical Ciphers**
@@ -28,7 +28,7 @@ To explore cryptographic vulnerabilities, the application incorporates an automa
   - **Atbash Cipher** — Alphabet inversion substitution cipher.
   - **ROT13** — Symmetric 13-shift Caesar variant.
 - **File Processing** — Upload `.txt` files, encrypt or decrypt, and download the result.
-- **Unit Test Suite** — Automated tests with `unittest` covering all algorithms, edge cases, and wraparound logic.
+- **Unit Test Suite** — Comprehensive automated tests with `unittest` (24 test cases) covering all algorithms, edge cases, wraparound logic, and API routes.
 
 ---
 
@@ -78,6 +78,7 @@ python -m unittest discover tests -v
 | Caesar: `XYZ`, shift 3 | `ABC` | Passed |
 | Caesar: `ABC`, shift 0 / 26 | `ABC` | Passed |
 | Caesar: `Hello, World!`, shift 3 | `Khoor, Zruog!` | Passed |
+| Caesar: `café 123! 🚀`, shift 3 | `fdié 123! 🚀` (Unicode safe) | Passed |
 | Vigenere: `ATTACKATDAWN`, key `LEMON` | `LXFOPVEFRNHR` | Passed |
 | Atbash: `Attack at dawn!` | `Zggzxp zg wzdm!` | Passed |
 | ROT13: Round-trip | Plaintext preserved | Passed |
@@ -97,11 +98,12 @@ End-to-End Encrypted Chat/
 |   |   +-- caesar.py                 # Caesar cipher, Chi2 scoring, brute-force cracker
 |   |   +-- ciphers.py                # Vigenere, Atbash, ROT13 implementations
 |   +-- static/                       # Web UI assets (served by FastAPI)
-|       +-- index.html                # Dark-theme Tailwind CSS dashboard (4 tabs)
+|       +-- index.html                # Dark/Light theme dashboard (4 tabs)
 |       +-- app.js                    # Client-side logic, Chart.js, API calls
 |
-+-- tests/                            # Automated unit test suite
-|   +-- test_ciphers.py               # unittest cases for all cipher algorithms
++-- tests/                            # Automated test suite (24 unit & integration tests)
+|   +-- test_ciphers.py               # Unit tests for cipher algorithms & cryptanalysis
+|   +-- test_api.py                   # Integration tests for all REST API endpoints
 |
 +-- notebooks/                        # Jupyter notebooks for demos & exploration
 |   +-- caesar_demo.ipynb             # Interactive Caesar cipher walkthrough
@@ -112,7 +114,7 @@ End-to-End Encrypted Chat/
 +-- docs/                             # Project documentation
 |   +-- ONBOARDING.md                 # Developer setup & architecture guide
 |
-+-- requirements.txt                  # Production dependencies
++-- requirements.txt                  # Production & test dependencies
 +-- README.md                         # Project overview (this file)
 ```
 

@@ -86,6 +86,17 @@ Or using `pytest`:
 python -m pytest tests -v
 ```
 
+All 24 automated unit and integration tests run in under a second and verify:
+- Caesar cipher shifting, modular wraparound, and negative shifts
+- Non-ASCII, unicode, digit, and punctuation preservation
+- Automated Chi-Squared ($\chi^2$) brute-force cryptanalysis scoring
+- Frequency analysis calculation
+- ROT13 round-trip symmetric encryption
+- Atbash alphabet inversion and unicode robustness
+- Vigenère encryption, decryption, and key validation
+- File upload processing and streaming responses
+- All 8 FastAPI REST API routes via `TestClient`
+
 ---
 
 ## 5. Project Architecture & Code Map
@@ -105,7 +116,8 @@ End-to-End Encrypted Chat/
 |       +-- app.js          # Client-side interactivity, frequency chart rendering
 |
 +-- tests/
-|   +-- test_ciphers.py     # Unit tests for all cipher algorithms and edge cases
+|   +-- test_ciphers.py     # Unit tests for cipher algorithms and cryptanalysis
+|   +-- test_api.py         # Integration tests for all REST API endpoints
 |
 +-- notebooks/
 |   +-- caesar_demo.ipynb   # Jupyter notebook demo and walkthrough
@@ -132,7 +144,8 @@ End-to-End Encrypted Chat/
 | `app/crypto/ciphers.py` | `vigenere_cipher()`, `atbash_cipher()`, `rot13()` |
 | `app/static/index.html` | Single-page app with 4 tabs: Caesar, Cracker, Multi-Cipher, File |
 | `app/static/app.js` | Fetch API calls, Chart.js histogram, tab switching, form handling |
-| `tests/test_ciphers.py` | 8 unittest cases covering all cipher algorithms and edge cases |
+| `tests/test_ciphers.py` | Unit test cases covering cipher algorithms, unicode preservation, and cryptanalysis |
+| `tests/test_api.py` | Integration test cases covering all 8 FastAPI routes using TestClient |
 | `scripts/caesar_cli.py` | Minimal standalone encrypt/decrypt/brute-force from the terminal |
 | `notebooks/caesar_demo.ipynb` | Interactive notebook for demos and exploration |
 

@@ -22,7 +22,7 @@ class TestCiphers(unittest.TestCase):
         # Accented characters, numbers, and emojis should be preserved untouched
         sample = "café 123! 🚀"
         encrypted = caesar_shift(sample, 3)
-        self.assertEqual(encrypted, "fdih 123! 🚀")
+        self.assertEqual(encrypted, "fdié 123! 🚀")
         decrypted = caesar_shift(encrypted, -3)
         self.assertEqual(decrypted, sample)
 
@@ -76,8 +76,8 @@ class TestCiphers(unittest.TestCase):
         self.assertEqual(decrypted, text)
 
     def test_vigenere_non_ascii_and_validation(self):
-        # Preserves non-ASCII and special characters
-        self.assertEqual(vigenere_cipher("café 123!", "KEY"), "rijé 123!")
+        # Preserves non-ASCII and special characters ('c'+10='m', 'a'+4='e', 'f'+24='d')
+        self.assertEqual(vigenere_cipher("café 123!", "KEY"), "medé 123!")
         # Empty or non-alphabetic key raises ValueError
         with self.assertRaises(ValueError):
             vigenere_cipher("Hello", "123!@#")
