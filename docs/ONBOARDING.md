@@ -99,7 +99,9 @@ All 24 automated unit and integration tests run in under a second and verify:
 
 ---
 
-## 5. Project Architecture & Code Map
+## 5. System Architecture & Execution Workflow
+
+![System Architecture & Execution Workflow](system_workflow_architecture.png)
 
 ```
 End-to-End Encrypted Chat/
@@ -127,6 +129,9 @@ End-to-End Encrypted Chat/
 |
 +-- docs/
 |   +-- ONBOARDING.md       # This file
+|   +-- system_workflow_architecture.png # High-resolution architecture diagram (2400x1500)
+|   +-- system_workflow_diagram.png   # Architectural overview infographic
+|   +-- architecture_workflow.svg     # Scalable vector graphics workflow diagram
 |
 +-- requirements.txt
 +-- README.md

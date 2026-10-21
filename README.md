@@ -14,6 +14,12 @@ To explore cryptographic vulnerabilities, the application incorporates an automa
 
 ---
 
+## 📐 System Architecture & Workflow
+
+![System Architecture & Execution Workflow](docs/system_workflow_architecture.png)
+
+---
+
 ## Features
 
 - **Interactive Web UI** — Real-time shift slider, Caesar alphabet wheel, one-click copy and text swap.
@@ -111,8 +117,11 @@ End-to-End Encrypted Chat/
 +-- scripts/                          # Standalone command-line utilities
 |   +-- caesar_cli.py                 # CLI encrypt / decrypt / brute-force tool
 |
-+-- docs/                             # Project documentation
++-- docs/                             # Project documentation & visual assets
 |   +-- ONBOARDING.md                 # Developer setup & architecture guide
+|   +-- system_workflow_architecture.png # High-resolution architecture diagram (2400x1500)
+|   +-- system_workflow_diagram.png   # Architectural overview infographic
+|   +-- architecture_workflow.svg     # Scalable vector graphics workflow diagram
 |
 +-- requirements.txt                  # Production & test dependencies
 +-- README.md                         # Project overview (this file)
