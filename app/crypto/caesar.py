@@ -31,14 +31,17 @@ def caesar_shift(text: str, shift: int, preserve_case: bool = True) -> str:
     """
     Encrypts or decrypts text using the Caesar cipher.
     Shift can be positive or negative.
+    Preserves non-ASCII characters, digits, and punctuation.
     """
     shift = shift % 26
     result = []
     
     for ch in text:
-        if ch.isalpha():
-            base = 65 if ch.isupper() else 97
-            shifted_char = chr((ord(ch) - base + shift) % 26 + base)
+        if 'A' <= ch <= 'Z':
+            shifted_char = chr((ord(ch) - 65 + shift) % 26 + 65)
+            result.append(shifted_char)
+        elif 'a' <= ch <= 'z':
+            shifted_char = chr((ord(ch) - 97 + shift) % 26 + 97)
             if not preserve_case:
                 shifted_char = shifted_char.upper()
             result.append(shifted_char)
@@ -51,8 +54,9 @@ def caesar_shift(text: str, shift: int, preserve_case: bool = True) -> str:
 def get_frequency_analysis(text: str) -> Dict[str, Dict[str, float]]:
     """
     Calculates letter counts, observed percentages, and comparison with English standard.
+    Analyzes Latin letters A-Z (case-insensitive).
     """
-    cleaned = [ch.upper() for ch in text if ch.isalpha()]
+    cleaned = [ch.upper() for ch in text if 'A' <= ch.upper() <= 'Z']
     total = len(cleaned)
     counts = {chr(c): 0 for c in range(ord('A'), ord('Z') + 1)}
     
@@ -77,7 +81,7 @@ def score_english(text: str) -> float:
     Scores how likely a piece of text is standard English using Chi-Squared statistic
     and dictionary matching. Lower score = better match with English.
     """
-    letters = [ch.upper() for ch in text if ch.isalpha()]
+    letters = [ch.upper() for ch in text if 'A' <= ch.upper() <= 'Z']
     total_letters = len(letters)
     if total_letters == 0:
         return 9999.0

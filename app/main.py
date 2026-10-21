@@ -57,6 +57,8 @@ def decrypt_caesar(req: CaesarRequest):
 
 @app.post("/api/v1/caesar/brute-force", response_model=BruteForceResponse, tags=["Caesar Cipher"])
 def brute_force(text: str = Form(..., description="Encrypted message to crack")):
+    if not text.strip():
+        raise HTTPException(status_code=400, detail="Ciphertext cannot be empty.")
     candidates = brute_force_crack(text)
     best = candidates[0] if candidates else None
     return BruteForceResponse(
@@ -69,7 +71,7 @@ def brute_force(text: str = Form(..., description="Encrypted message to crack"))
 @app.post("/api/v1/caesar/frequency", response_model=FrequencyResponse, tags=["Cryptanalysis"])
 def frequency_analysis(text: str = Form(..., description="Text to analyze")):
     analysis = get_frequency_analysis(text)
-    total_letters = sum(1 for ch in text if ch.isalpha())
+    total_letters = sum(1 for ch in text if ('A' <= ch <= 'Z' or 'a' <= ch <= 'z'))
     return FrequencyResponse(total_letters=total_letters, frequencies=analysis)
 
 
@@ -110,10 +112,12 @@ async def process_file(
         actual_shift = -shift if decrypt else shift
         processed_text = caesar_shift(text, actual_shift)
         
+        safe_filename = os.path.basename(file.filename or "file.txt")
         return PlainTextResponse(
             content=processed_text,
+            media_type="text/plain; charset=utf-8",
             headers={
-                "Content-Disposition": f'attachment; filename="processed_{file.filename}"'
+                "Content-Disposition": f'attachment; filename="processed_{safe_filename}"'
             }
         )
     except Exception as e:

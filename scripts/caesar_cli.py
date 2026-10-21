@@ -8,9 +8,10 @@ def caesar_shift(text: str, shift: int) -> str:
     out = []
     shift = shift % 26
     for ch in text:
-        if ch.isalpha():
-            base = 65 if ch.isupper() else 97
-            out.append(chr((ord(ch) - base + shift) % 26 + base))
+        if 'A' <= ch <= 'Z':
+            out.append(chr((ord(ch) - 65 + shift) % 26 + 65))
+        elif 'a' <= ch <= 'z':
+            out.append(chr((ord(ch) - 97 + shift) % 26 + 97))
         else:
             out.append(ch)
     return "".join(out)
